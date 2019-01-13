@@ -16,7 +16,7 @@ def parse_args():
     parser = ArgumentParser(description="Python utility to query RocketReach API", formatter_class=RawTextHelpFormatter)
     parser.add_argument("-c", required=False, metavar="company", help="Search people in company (i.e.: mycompany)")
     parser.add_argument("-d", required=False, metavar="domain", help="Search people in domain (i.e.: mycompany.com)")
-    parser.add_argument("-l", required=False, metavar="", help="Perform lookup search (i.e.: emails)")
+    parser.add_argument("-l", required=False, action="store_true", help="Perform lookup search (i.e.: emails)")
 
     parser.add_argument("-t", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
     parser.add_argument("--write", required=False, metavar="<file>", help="Output results to file (csv)")

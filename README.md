@@ -30,5 +30,7 @@ optional arguments:
 ```
 
 ### ToDo
+- Finish lookup (RocketReach)
+- Analyze mail patterns
 - Add Hunter.io
 - Add LinkedIn (API or website)
