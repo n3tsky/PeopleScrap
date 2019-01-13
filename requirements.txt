@@ -1,0 +1,2 @@
+requests==2.18.4
+tabulate==0.8.2

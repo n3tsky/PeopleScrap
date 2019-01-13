@@ -5,6 +5,9 @@ import settings
 from functions.http import *
 from functions.generic import *
 
+INSUFFICIENT_CREDS=0
+MAX_CHARS=75
+
 class People:
     def __init__(self):
         self.fullname = ""
@@ -18,7 +21,8 @@ class People:
     def prep4display(self):
         content = ""
         if self.job != None:
-            content += "Job: %s\n" % (self.job.replace("\n",""))
+            t_job = self.job.replace("\n","")
+            content += "Job: %s\n" % (split_long_string(self.job, MAX_CHARS))
         if self.employer != None:
             content += "Employer: %s\n" % (self.employer.replace("\n",""))
         if self.city != None:
@@ -45,14 +49,16 @@ def rocketReach_call_search(HTTP_REQ, company, page_start=1,page_size=100):
     return pagination, response
 
 def rockeyReach_call_lookup(HTTP_REQ, id):
+    global INSUFFICIENT_CREDS
     HTTP_REQ["url"] = "%s?api_key=%s&id=%s" % (ROCKETREACH_LOOKUP_URL, ROCKETREACH_API_KEY, id)
     http_code, response = http_get_json(HTTP_REQ)
     detail = dict_check_and_get(response, "detail")
     if detail != None:
         print("[!] %s" % detail)
+        if "You have insufficient lookup credits." in detail:
+            INSUFFICIENT_CREDS+=1
     else:
-        # Get information
-        pass
+        print(response)
 
 # Parsing
 def rocketreach_parse_people(json_data):
@@ -86,11 +92,22 @@ def rocketReach_fetch_people_from_company(HTTP_REQ, company):
         next_page = dict_check_and_get(pagination, "nextPage")
         break
 
+def rocketReach_lookup_people(HTTP_REQ):
+    global INSUFFICIENT_CREDS
+    print("\n[*] Gathering information (lookup)")
+    for p in settings.PEOPLE_DATA:
+        if (p.rocket_id != None) and (p.rocket_id != ""):
+            rockeyReach_call_lookup(HTTP_REQ, p.rocket_id)
+            if (INSUFFICIENT_CREDS > 3):
+                print("[!] Insufficient lookup credits, aborting lookup search...")
+                break
+
 # Display info about account related to API key
 def rocketReach_display_account_info(data_info):
     print("[*] RocketReach account info:")
     display_value_from_dict(data_info, "email", " - Email: ")
     display_value_from_dict(data_info, "lookup_credit_balance", " - Lookup credit: ")
+    display_value_from_dict(data_info, "plan", " - Account type: ")
 
 # Checks
 def rocketReach_check_account(HTTP_REQ):
@@ -110,6 +127,7 @@ def rocketReach_display_people():
     for p in settings.PEOPLE_DATA:
         display_list.append(p.prep4display())
     print(tabulate(display_list, ["Full name", "RocketReach"], "grid"))
+    print("[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
 
 # Check if an API key has been set by user
 def rocketReach_check_basic():
@@ -122,4 +140,4 @@ def rocketReach_check_basic():
 def rocketReach_checks(HTTP_REQ):
     print("[*] RocketReach: Checking API key\n")
     if not (rocketReach_check_basic() and rocketReach_check_account(HTTP_REQ)):
-        exiting("Error while checking RocketReach API key")
+        exiting("Error while checking RocketReach API key (provide a valid API key)")

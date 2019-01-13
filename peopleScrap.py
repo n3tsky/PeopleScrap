@@ -16,6 +16,8 @@ def parse_args():
     parser = ArgumentParser(description="Python utility to query RocketReach API", formatter_class=RawTextHelpFormatter)
     parser.add_argument("-c", required=False, metavar="company", help="Search people in company (i.e.: mycompany)")
     parser.add_argument("-d", required=False, metavar="domain", help="Search people in domain (i.e.: mycompany.com)")
+    parser.add_argument("-l", required=False, metavar="", help="Perform lookup search (i.e.: emails)")
+
     parser.add_argument("-t", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
     parser.add_argument("--write", required=False, metavar="<file>", help="Output results to file (csv)")
     parser.add_argument("--user", required=False, metavar="User-agent", default=USER_AGENT, help="Change default user-agent (default: %s)" % USER_AGENT)
@@ -49,7 +51,10 @@ def main(args):
         print("[*] Not performing API checks")
 
     print()
+    input("Searching for people in \"%s\", press any key to continue..." % (args.c))
     rocketReach_fetch_people_from_company(HTTP_REQ, args.c)
+    if (args.l): # Perform lookup
+        rocketReach_lookup_people(HTTP_REQ)
     rocketReach_display_people()
 
 # Starts here

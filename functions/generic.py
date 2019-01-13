@@ -19,6 +19,12 @@ def parse_json(data, needed):
         g.append(l)
     return g
 
+def split_long_string(string, max_len):
+    if (string != None) and (len(string) > max_len):
+        return "\n".join([string[i:i+max_len] for i in range(0, len(string), max_len)])
+    else:
+        return string
+
 def exiting(message):
     print("[!] %s" % message)
     print("Exiting...")
