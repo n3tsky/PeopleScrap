@@ -29,3 +29,8 @@ def exiting(message):
     print("[!] %s" % message)
     print("Exiting...")
     sys.exit(1)
+
+def properly_add_to_list(m_list, value):
+    if value != None:
+        if value not in m_list:
+            m_list.append(value)

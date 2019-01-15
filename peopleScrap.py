@@ -6,6 +6,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 import settings
 from functions.generic import *
 from functions.rocketreach import *
+from functions.hunterio import *
 
 # SIGINT handler
 def interruptHandler(signal, frame):
@@ -21,12 +22,12 @@ def parse_args():
     parser.add_argument("-t", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
     parser.add_argument("--write", required=False, metavar="<file>", help="Output results to file (csv)")
     parser.add_argument("--user", required=False, metavar="User-agent", default=USER_AGENT, help="Change default user-agent (default: %s)" % USER_AGENT)
-    parser.add_argument("--proxy", required=False, metavar="proxy", default="", help="Proxy to perform HTTP requests (ie.: http://localhost:8080, socks://localhost:8080)")
+    parser.add_argument("--proxy", required=False, metavar="proxy", default="", help="Proxy to perform HTTP requests (ie.: http://localhost:8080, socks5://localhost:8080)")
     parser.add_argument("--nocheck", required=False, action="store_true", help="Do not perform API checks")
     args = parser.parse_args()
 
-    if (not args.c):
-        print("[!] %s requires a company name (-c)\nExiting..." % (sys.argv[0]))
+    if not (args.c or args.d):
+        print("[!] %s requires a company name (-c) or company domain (-d)\nExiting..." % (sys.argv[0]))
         sys.exit(1)
     return args
 
@@ -46,16 +47,22 @@ def main(args):
 
     # Perform some checks to ensure RocketReach's API key is ok
     if not args.nocheck:
-        rocketReach_checks(HTTP_REQ)
+        #rocketReach_checks(HTTP_REQ)
+        hunterIO_checks(HTTP_REQ)
     else:
         print("[*] Not performing API checks")
 
     print()
     input("Searching for people in \"%s\", press any key to continue..." % (args.c))
-    rocketReach_fetch_people_from_company(HTTP_REQ, args.c)
+    #rocketReach_fetch_people_from_company(HTTP_REQ, args.c)
+
+    hunterIO_fetch_domain_info(HTTP_REQ, args.d)
+
+
     if (args.l): # Perform lookup
         rocketReach_lookup_people(HTTP_REQ)
-    rocketReach_display_people()
+
+    #rocketReach_display_people()
 
 # Starts here
 if __name__ == "__main__":
