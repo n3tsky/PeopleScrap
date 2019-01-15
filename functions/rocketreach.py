@@ -1,11 +1,13 @@
 # coding=utf-8
 from tabulate import tabulate
+from time import sleep
 
 import settings
 from functions.http import *
 from functions.generic import *
 
 INSUFFICIENT_CREDS=0
+MAX_INSUFFICIENT_CREDS=3
 MAX_CHARS=75
 
 class People:
@@ -13,6 +15,8 @@ class People:
         self.fullname = ""
         self.job = ""
         self.employer = ""
+        self.emails = []
+        self.phones = []
         self.city = ""
         self.country_code = ""
         self.rocket_id = ""
@@ -58,7 +62,14 @@ def rockeyReach_call_lookup(HTTP_REQ, id):
         if "You have insufficient lookup credits." in detail:
             INSUFFICIENT_CREDS+=1
     else:
-        print(response)
+        if len(response):
+            status = dict_check_and_get(response[0], "status")
+            if status != "complete":
+                print("Status: %s (id:%d)" % (status, id))
+            return response
+    return None
+
+### /API calls
 
 # Parsing
 def rocketreach_parse_people(json_data):
@@ -90,22 +101,49 @@ def rocketReach_fetch_people_from_company(HTTP_REQ, company):
         # Get pagination
         current_page = dict_check_and_get(pagination, "thisPage")
         next_page = dict_check_and_get(pagination, "nextPage")
+        break
 
+# Perform lookup (search for more information about people)
 def rocketReach_lookup_people(HTTP_REQ):
     global INSUFFICIENT_CREDS
     print("\n[*] Gathering information (lookup)")
-    for p in settings.PEOPLE_DATA:
-        if (p.rocket_id != None) and (p.rocket_id != ""):
-            rockeyReach_call_lookup(HTTP_REQ, p.rocket_id)
-            if (INSUFFICIENT_CREDS > 3):
-                print("[!] Insufficient lookup credits, aborting lookup search...")
-                break
+    lookup_people = [p for p in settings.PEOPLE_DATA if (p.rocket_id != None and p.rocket_id != "")]
+    print("[*] %d people with a RocketReach ID" % (len(lookup_people)))
+    for p in lookup_people:
+        result_lookup = rockeyReach_call_lookup(HTTP_REQ, p.rocket_id)
+
+        if result_lookup != None:
+            print(result_lookup)
+
+            print("Size of response lookup: %s" % (len(result_lookup)))
+            result_lookup = result_lookup[0]
+
+            # Personal and work emails
+            properly_add_to_list(p.emails, dict_check_and_get(result_lookup, "current_work_email"))
+            properly_add_to_list(p.emails, dict_check_and_get(result_lookup, "current_personal_email"))
+
+            list_emails = dict_check_and_get(result_lookup, "emails")
+            if (list_emails != None):
+                for e in list_emails:
+                    properly_add_to_list(p.emails, dict_check_and_get(e, "email"))
+
+            list_phones = dict_check_and_get(result_lookup, "phones")
+            if (list_phones != None):
+                for p in list_phones:
+                    properly_add_to_list(p.phones, p)
+
+        if (INSUFFICIENT_CREDS > MAX_INSUFFICIENT_CREDS):
+            print("[!] Insufficient lookup credits, aborting lookup search...")
+            break
+
+        # Wait 1 second - prevent throttling
+        sleep(2)
 
 # Display info about account related to API key
 def rocketReach_display_account_info(data_info):
     print("[*] RocketReach account info:")
     display_value_from_dict(data_info, "email", " - Email: ")
-    display_value_from_dict(data_info, "lookup_credit_balance", " - Lookup credit: ")
+    display_value_from_dict(data_info, "lookup_credit_balance", " - Available lookup credit: ")
     display_value_from_dict(data_info, "plan", " - Account type: ")
 
 # Checks
@@ -114,7 +152,7 @@ def rocketReach_check_account(HTTP_REQ):
     if result != None:
         detail = dict_check_and_get(result, "detail")
         if detail != None: # Not good
-            print("[!] %s " % detail)
+            print("[!] Error: %s " % detail)
         else:
             rocketReach_display_account_info(result)
             return 1
@@ -139,4 +177,4 @@ def rocketReach_check_basic():
 def rocketReach_checks(HTTP_REQ):
     print("[*] RocketReach: Checking API key\n")
     if not (rocketReach_check_basic() and rocketReach_check_account(HTTP_REQ)):
-        exiting("Error while checking RocketReach API key (provide a valid API key)")
+        exiting("Error while checking RocketReach API key (please provide a valid API key)")
