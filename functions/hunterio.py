@@ -7,6 +7,8 @@ from functions.http import *
 from functions.generic import *
 
 OFFSET_VALUE=100
+INSUFFICIENT_CREDS=0
+MAX_INSUFFICIENT_CREDS=3
 
 ### API calls
 def hunterIO_call_account(HTTP_REQ):
@@ -17,8 +19,8 @@ def hunterIO_call_account(HTTP_REQ):
 def hunterIO_call_domain_search(HTTP_REQ, domain, offset=0, limit=100):
     HTTP_REQ["url"] = "%s?api_key=%s&domain=%s&offset=%d&limit=%d" % (HUNTERIO_DOMAIN_URL, HUNTERIO_API_KEY, domain, offset, limit)
     http_code, response = http_get_json(HTTP_REQ)
+    hunterIO_check_limit(response)
     return response
-
 ### /API calls
 
 # Parsing
@@ -50,7 +52,7 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
         display_value_from_dict(data, "pattern", " - Mail pattern: ")
         display_value_from_dict(data, "organization", " - Organization: ")
         # Parse info
-        #hunterIO_parse_info(data)
+        hunterIO_parse_info(data)
 
     # Get meta
     meta = dict_check_and_get(json_data, "meta")
@@ -61,20 +63,36 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
         # Loop and fetch people
         while total_people > current_offset:
             print("[*] People: %d - %d" % (current_offset, total_people))
-            # Query and parse
-            #json_data = hunterIO_call_domain_search(HTTP_REQ, domain, offset=current_offset)
+            # Query (offset)
+            json_data = hunterIO_call_domain_search(HTTP_REQ, domain, offset=current_offset)
             # Parse info
-            #hunterIO_parse_info(data)
-            current_offset += OFFSET_VALUE
+            data = dict_check_and_get(json_data, "data")
+            if data != None:
+                hunterIO_parse_info(data)
 
+            if (INSUFFICIENT_CREDS > MAX_INSUFFICIENT_CREDS):
+                print("[!] Insufficient lookup credits, aborting lookup search...")
+                break
+            current_offset += OFFSET_VALUE
 
 # Display info about account related to API key
 def hunterIO_display_account_info(data_info):
-    print("[*] HunterIO account info:")
+    print("*** HunterIO account info ***")
     display_value_from_dict(data_info, "email", " - Email: ")
     display_value_from_dict(data_info, "plan_name", " - Account type: ")
     display_value_from_dict(data_info, "reset_date", " - Reset date: ")
     display_value_from_dict(data_info, "calls", " - Calls: ")
+
+def hunterIO_check_limit(json_data):
+    global INSUFFICIENT_CREDS
+    #{'errors': [{'id': 'too_many_requests', 'code': 429, 'details': "You've exceeded your monthly limit. Please upgrade your account."}]}
+    errors = dict_check_and_get(json_data, "errors")
+    if errors != None:
+        errors = errors[0]
+        details = dict_check_and_get(errors, "details")
+        if "You've exceeded your monthly limit" in details:
+            print("[!] HunterIO | %s" % details)
+            INSUFFICIENT_CREDS+=1
 
 # Check accounts (calls /account)
 def hunterIO_check_account(HTTP_REQ):
@@ -83,7 +101,7 @@ def hunterIO_check_account(HTTP_REQ):
         errors = dict_check_and_get(result, "errors")
         if errors != None: # Not good
             details =  dict_check_and_get(errors[0], "details")
-            print("[!] Error: %s " % details)
+            print("[!] HunterIO | Error: %s " % details)
         else:
             data = dict_check_and_get(result, "data")
             hunterIO_display_account_info(data)
@@ -99,6 +117,6 @@ def hunterIO_check_basic():
 
 # Perform checks
 def hunterIO_checks(HTTP_REQ):
-    print("[*] HunterIO: Checking API key\n")
+    print("\n[*] HunterIO: Checking API key\n")
     if not (hunterIO_check_basic() and hunterIO_check_account(HTTP_REQ)):
-        exiting("Error while checking HunterIO API key (please provide a valid API key)")
+        print("[!] HunterIO | Error while checking HunterIO API key (please provide a valid API key)")

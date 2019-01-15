@@ -101,7 +101,6 @@ def rocketReach_fetch_people_from_company(HTTP_REQ, company):
         # Get pagination
         current_page = dict_check_and_get(pagination, "thisPage")
         next_page = dict_check_and_get(pagination, "nextPage")
-        break
 
 # Perform lookup (search for more information about people)
 def rocketReach_lookup_people(HTTP_REQ):
@@ -137,11 +136,11 @@ def rocketReach_lookup_people(HTTP_REQ):
             break
 
         # Wait 1 second - prevent throttling
-        sleep(2)
+        sleep(1.2)
 
 # Display info about account related to API key
 def rocketReach_display_account_info(data_info):
-    print("[*] RocketReach account info:")
+    print("*** RocketReach account info ***")
     display_value_from_dict(data_info, "email", " - Email: ")
     display_value_from_dict(data_info, "lookup_credit_balance", " - Available lookup credit: ")
     display_value_from_dict(data_info, "plan", " - Account type: ")
@@ -152,7 +151,7 @@ def rocketReach_check_account(HTTP_REQ):
     if result != None:
         detail = dict_check_and_get(result, "detail")
         if detail != None: # Not good
-            print("[!] Error: %s " % detail)
+            print("[!] RocketReach | %s " % detail)
         else:
             rocketReach_display_account_info(result)
             return 1
@@ -175,6 +174,6 @@ def rocketReach_check_basic():
 
 # Perform checks
 def rocketReach_checks(HTTP_REQ):
-    print("[*] RocketReach: Checking API key\n")
+    print("\n[*] RocketReach: Checking API key\n")
     if not (rocketReach_check_basic() and rocketReach_check_account(HTTP_REQ)):
-        exiting("Error while checking RocketReach API key (please provide a valid API key)")
+        print("[!] RocketReach | Error while checking RocketReach API key (please provide a valid API key)")
