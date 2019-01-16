@@ -7,7 +7,6 @@ from functions.generic import *
 
 INSUFFICIENT_CREDS=0
 MAX_INSUFFICIENT_CREDS=3
-MAX_CHARS=75
 
 ### API calls
 def rocketReach_call_account(HTTP_REQ):
