@@ -3,11 +3,20 @@
 PeopleScrap helps gathering information about people in a company (i.e.: mycompany) or domain (i.e.: mycompany.com).
 
 ### Features
+- Find emails, first name, last name, job position, city/location, phone numbers, etc.
 - Developped in Python3
-- Uses RocketReach API to gather information
+- Uses RocketReach & Hunter.io APIs to gather information
 
 ### Installation
-
+* Install Python3 dependencies
+```
+pip3 install --user -r requirements.txt
+```
+* Set up your API keys in "settings.py"
+* Run
+```
+./peopleScrap.py
+```
 
 ### Usage
 ```
