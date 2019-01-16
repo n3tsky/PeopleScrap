@@ -10,6 +10,7 @@ from functions.hunterio import *
 
 # SIGINT handler
 def interruptHandler(signal, frame):
+    display_people()
     exiting("Interrupted by user.")
 
 # Parse arguments
@@ -69,7 +70,8 @@ def main(args):
     # Ask user for pattern validation
 
     # Display to user
-    #rocketReach_display_people()
+    print("\n[*] Now displaying info to user: \n")
+    display_people()
 
 # Starts here
 if __name__ == "__main__":

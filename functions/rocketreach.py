@@ -1,5 +1,4 @@
 # coding=utf-8
-from tabulate import tabulate
 from time import sleep
 
 import settings
@@ -9,36 +8,6 @@ from functions.generic import *
 INSUFFICIENT_CREDS=0
 MAX_INSUFFICIENT_CREDS=3
 MAX_CHARS=75
-
-class People:
-    def __init__(self):
-        self.fullname = ""
-        self.job = ""
-        self.employer = ""
-        self.emails = []
-        self.phones = []
-        self.city = ""
-        self.country_code = ""
-        self.rocket_id = ""
-        self.rocket_status = ""
-
-    def prep4display(self):
-        content = ""
-        if self.job != None:
-            t_job = self.job.replace("\n","")
-            content += "Job: %s\n" % (split_long_string(self.job, MAX_CHARS))
-        if self.employer != None:
-            content += "Employer: %s\n" % (self.employer.replace("\n",""))
-        if self.city != None:
-            content += "City: %s\n" % (self.city.replace("\n",""))
-        if self.country_code != None:
-            content += "Country code: %s\n" % (self.country_code.replace("\n",""))
-        if self.rocket_id != None:
-            content += "RocketReach ID: %s" % (self.rocket_id)
-        return [self.fullname, content]
-
-    def __str__(self):
-        return(self.fullname)
 
 ### API calls
 def rocketReach_call_account(HTTP_REQ):
@@ -68,7 +37,6 @@ def rockeyReach_call_lookup(HTTP_REQ, id):
                 print("Status: %s (id:%d)" % (status, id))
             return response
     return None
-
 ### /API calls
 
 # Parsing
@@ -76,13 +44,10 @@ def rocketreach_parse_people(json_data):
     profiles = dict_check_and_get(json_data, "profiles")
     for profile in profiles:
         p = People()
-        p.fullname = dict_check_and_get(profile, "name")
-        p.job = dict_check_and_get(profile, "current_title")
-        p.employer = dict_check_and_get(profile, "current_employer")
-        p.city = dict_check_and_get(profile, "city")
-        p.country_code = dict_check_and_get(profile, "country_code")
-        p.rocket_id = dict_check_and_get(profile, "id")
-        p.rocket_status = dict_check_and_get(profile, "status")
+        p.parse_from_rocketReach(dict_check_and_get(profile, "name"), dict_check_and_get(profile, "current_title"),
+            dict_check_and_get(profile, "current_employer"), dict_check_and_get(profile, "city"),
+            dict_check_and_get(profile, "country_code"), dict_check_and_get(profile, "id"),
+            dict_check_and_get(profile, "status"))
         settings.PEOPLE_DATA.append(p)
 
 def rocketReach_fetch_people_from_company(HTTP_REQ, company):
@@ -156,14 +121,6 @@ def rocketReach_check_account(HTTP_REQ):
             rocketReach_display_account_info(result)
             return 1
     return 0
-
-# Display info gathered to user
-def rocketReach_display_people():
-    display_list = []
-    for p in settings.PEOPLE_DATA:
-        display_list.append(p.prep4display())
-    print(tabulate(display_list, ["Full name", "RocketReach"], "grid"))
-    print("[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
 
 # Check if an API key has been set by user
 def rocketReach_check_basic():
