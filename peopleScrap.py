@@ -61,17 +61,19 @@ def main(args):
         rocketReach_fetch_people_from_company(HTTP_REQ, args.c)
 
     # HunterIO
+    possible_mail_pattern = ""
     if (args.d): # If a company domain was provided
-        hunterIO_fetch_domain_info(HTTP_REQ, args.d)
+        possible_mail_pattern = hunterIO_fetch_domain_info(HTTP_REQ, args.d)
 
     if (args.c and args.l): # Perform lookup
         rocketReach_lookup_people(HTTP_REQ)
 
     # Ask user for pattern validation
+    find_mail_pattern(possible_mail_pattern)
 
     # Display to user
     print("\n[*] Now displaying info to user: \n")
-    display_people()
+    #display_people()
 
 # Starts here
 if __name__ == "__main__":

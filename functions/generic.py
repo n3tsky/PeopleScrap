@@ -3,6 +3,7 @@ import settings
 from tabulate import tabulate
 
 MAX_CHARS=75
+MAIL_PATTERNS = [(1, "{first}.{last}"), (2, "{f}.{last}"), (3, "{first}{last}"), (4, "{f}{last}"), (5, "{first}")]
 
 # Check if value is in given dictionary or return None
 def dict_check_and_get(d, value):
@@ -29,16 +30,29 @@ def split_long_string(string, max_len):
     else:
         return string
 
-def exiting(message):
-    print("[!] %s" % message)
-    print("Exiting...")
-    sys.exit(1)
-
 def properly_add_to_list(m_list, value):
     if value != None:
         if value not in m_list:
             m_list.append(value)
 
+def find_mail_pattern(possible_value):
+    print("\n[*] Mail pattern:")
+    if possible_value != None:
+        print(" - HunterIO find the following mail pattern: \"%s\"" % (possible_value))
+    print(" - We propose the following mail pattern for generation:")
+    for mi, mp in MAIL_PATTERNS: print("  - %d/ %s" % (mi, mp))
+    # Wait for user confirmation
+    while True:
+        pattern_result = input("\nWich pattern do you want to choose? ")
+        if pattern_result.isdigit():
+            if int(pattern_result) > 0 and (int(pattern_result) <= len(MAIL_PATTERNS)):
+                break
+
+    # Let's generate
+    generating_mail_with_pattern(MAIL_PATTERNS[int(pattern_result)][1])
+
+def generating_mail_with_pattern(pattern):
+    print(" - Generating e-mails with the following pattern: \"%s\"" % (pattern))
 
 # Display info gathered to user
 def display_people():
@@ -46,7 +60,12 @@ def display_people():
     for p in settings.PEOPLE_DATA:
         display_list.append(p.prep4display())
     print(tabulate(display_list, ["Full name", "RocketReach"], "grid"))
-    print("[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
+    print("\n[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
+
+def exiting(message):
+    print("[!] %s" % message)
+    print("Exiting...")
+    sys.exit(1)
 
 ### Class
 class People:
@@ -58,6 +77,7 @@ class People:
         self.employer = ""
         self.emails = []
         self.phones = []
+        self.twitter = ""
         self.city = ""
         self.country_code = ""
         self.rocket_id = ""
@@ -80,6 +100,19 @@ class People:
             self.rocket_id = int(r_id)
         if r_status != None:
             self.rocket_status = r_status
+
+    def parse_from_hunterIO(self, first_name, last_name, email, phone_number, twitter):
+        if first_name != None:
+            self.firstname = first_name
+        if last_name != None:
+            self.lastname = last_name
+        self.fullname = "%s %s" % (self.firstname, self.lastname)
+        if email != None:
+            properly_add_to_list(self.emails, email)
+        if phone_number != None:
+            properly_add_to_list(self.phones, phone_number)
+        if twitter != None:
+            self.twitter = twitter
 
     # Try to determine first and last names
     def split_lastname(self):

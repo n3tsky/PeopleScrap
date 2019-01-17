@@ -51,15 +51,16 @@ def rocketreach_parse_people(json_data):
 
 def rocketReach_fetch_people_from_company(HTTP_REQ, company):
     # Get data
+    print("\n[*] RocketReach - Starting...")
     pagination, data  = rocketReach_call_search(HTTP_REQ, company)
-    display_value_from_dict(pagination, "total", "[*] Total people: ")
+    display_value_from_dict(pagination, "total", "[*] RocketReach - Total people: ")
     # Parse data (if only one page)
     rocketreach_parse_people(data)
     # Iterate over page(s), if necessary
     current_page = dict_check_and_get(pagination, "thisPage")
     next_page = dict_check_and_get(pagination, "nextPage")
     while current_page != next_page:
-        print("[*] People: %d - %d" % (current_page, next_page))
+        print("[*] RocketReach - People: %d - %d" % (current_page, next_page))
         pagination, data = rocketReach_call_search(HTTP_REQ, company, next_page)
         rocketreach_parse_people(data)
         # Get pagination

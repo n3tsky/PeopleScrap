@@ -25,29 +25,26 @@ def hunterIO_call_domain_search(HTTP_REQ, domain, offset=0, limit=100):
 
 # Parsing
 def hunterIO_parse_info(data):
-    print("ok")
     # Get emails
-    #emails = dict_check_and_get(data, "emails")
-    #print(emails)
-    #if emails != None:
-    #    for e in emails:
-    #        display_value_from_dict(e, "value", " - Email: ")
-    #        display_value_from_dict(e, "type", " - Email type: ")
-    #        display_value_from_dict(e, "confidence", " - Confidence: ")
-    #        display_value_from_dict(e, "first_name", " - First name: ")
-    #        display_value_from_dict(e, "last_name", " - Last name: ")
-    #        display_value_from_dict(e, "phone_number", " - Phone: ")
-    #        print()
-    #print(json_data)
+    emails = dict_check_and_get(data, "emails")
+    if emails != None:
+        for e in emails:
+            # Maybe try to clear doublon, based on emails and/or name?
+            p = People()
+            p.parse_from_hunterIO(dict_check_and_get(e, "first_name"), dict_check_and_get(e, "last_name"),
+                dict_check_and_get(e, "value"), dict_check_and_get(e, "phone_number"), dict_check_and_get(e, "twitter"))
+            settings.PEOPLE_DATA.append(p)
 
 def hunterIO_fetch_domain_info(HTTP_REQ, domain):
     # Get data
+    print("\n[*] HunterIO - Starting...")
     current_offset = OFFSET_VALUE
     json_data = hunterIO_call_domain_search(HTTP_REQ, domain) # Default offset = 0
 
     # Get data
     data = dict_check_and_get(json_data, "data")
     if data != None:
+        print("[*] HunterIO - Info")
         display_value_from_dict(data, "webmail", " - Webmail: ")
         display_value_from_dict(data, "pattern", " - Mail pattern: ")
         display_value_from_dict(data, "organization", " - Organization: ")
@@ -62,7 +59,7 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
         display_value_from_dict(meta, "limit", " - limit: ")
         # Loop and fetch people
         while total_people > current_offset:
-            print("[*] People: %d - %d" % (current_offset, total_people))
+            print("[*] HunterIO - People: %d - %d" % (current_offset, total_people))
             # Query (offset)
             json_data = hunterIO_call_domain_search(HTTP_REQ, domain, offset=current_offset)
             # Parse info
@@ -74,6 +71,8 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
                 print("[!] Insufficient lookup credits, aborting lookup search...")
                 break
             current_offset += OFFSET_VALUE
+            break
+    return dict_check_and_get(data, "pattern")
 
 # Display info about account related to API key
 def hunterIO_display_account_info(data_info):
