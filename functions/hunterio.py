@@ -40,6 +40,7 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
     print("\n[*] HunterIO - Starting...")
     current_offset = OFFSET_VALUE
     json_data = hunterIO_call_domain_search(HTTP_REQ, domain) # Default offset = 0
+    ret_pattern = ""
 
     # Get data
     data = dict_check_and_get(json_data, "data")
@@ -47,6 +48,7 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
         print("[*] HunterIO - Info")
         display_value_from_dict(data, "webmail", " - Webmail: ")
         display_value_from_dict(data, "pattern", " - Mail pattern: ")
+        ret_pattern = dict_check_and_get(data, "pattern")
         display_value_from_dict(data, "organization", " - Organization: ")
         # Parse info
         hunterIO_parse_info(data)
@@ -72,7 +74,7 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
                 break
             current_offset += OFFSET_VALUE
             break
-    return dict_check_and_get(data, "pattern")
+    return ret_pattern
 
 # Display info about account related to API key
 def hunterIO_display_account_info(data_info):
