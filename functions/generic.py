@@ -35,9 +35,20 @@ def properly_add_to_list(m_list, value):
         if value not in m_list:
             m_list.append(value)
 
+def ask_for_mail_pattern():
+    print("\n[*] Mail pattern")
+    while True:
+        response = input("   Do you want to generate mail pattern (y/n)? ")
+        if response.lower() == "y":
+            return 1
+        elif response.lower() == "n":
+            return 0
+        else:
+            continue
+
 def find_mail_pattern(possible_value):
     print("\n[*] Mail pattern:")
-    if possible_value != None:
+    if possible_value != None or possible_value != "":
         print(" - HunterIO find the following mail pattern: \"%s\"" % (possible_value))
     print(" - We propose the following mail pattern for generation:")
     for mi, mp in MAIL_PATTERNS: print("  - %d/ %s" % (mi, mp))
@@ -62,6 +73,7 @@ def display_people():
     print(tabulate(display_list, ["Full name", "RocketReach"], "grid"))
     print("\n[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
 
+# Exiting program with custom message
 def exiting(message):
     print("[!] %s" % message)
     print("Exiting...")
@@ -137,7 +149,9 @@ class People:
         if self.city != None:
             content += "Country code: %s\n" % (self.country_code.replace("\n",""))
         if self.rocket_id != None:
-            content += "RocketReach ID: %s" % (self.rocket_id)
+            content += "RocketReach ID: %s\n" % (self.rocket_id)
+        if self.emails != None:
+            content += "Emails: %s" % (", ".join(self.emails))
 
         info_name = "%s\n\nFirst name: %s\nLast name: %s" % (self.fullname, self.firstname, self.lastname)
         return [info_name, content]

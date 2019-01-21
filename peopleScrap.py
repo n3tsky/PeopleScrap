@@ -69,11 +69,12 @@ def main(args):
         rocketReach_lookup_people(HTTP_REQ)
 
     # Ask user for pattern validation
-    find_mail_pattern(possible_mail_pattern)
+    if ask_for_mail_pattern():
+        find_mail_pattern(possible_mail_pattern)
 
     # Display to user
     print("\n[*] Now displaying info to user: \n")
-    #display_people()
+    display_people()
 
 # Starts here
 if __name__ == "__main__":
