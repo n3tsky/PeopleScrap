@@ -15,6 +15,10 @@ def display_value_from_dict(d, value, pre="", post=""):
     if result != None:
         print("%s%s%s" % (pre, result, post))
 
+def write_to_file(output_file, mode, data):
+    with open(output_file, mode) as fout:
+        fout.write("%s\n" % (data))
+
 # Parse JSON result
 def parse_json(data, needed):
     g = list()
@@ -48,6 +52,7 @@ def ask_for_mail_pattern():
         else:
             continue
 
+# Try to figure out the mail pattern (HunterIO + user input)
 def find_mail_pattern(possible_value, possible_domain = ""):
     if possible_value != None and possible_value != "":
         print(" - HunterIO find the following mail pattern: \"%s\"" % (possible_value))
@@ -96,6 +101,25 @@ def display_people():
         display_list.append(p.prep4display())
     print(tabulate(display_list, ["Full name", "RocketReach"], "grid"))
     print("\n[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
+
+# Write output to file
+def write_people(output_file):
+    HEADERS = "fullname;first name;last name;valid emails;generated email;phones;city;country;job;employer;twitter;rocket ID;"
+    # Write headers
+    write_to_file(output_file, "w", HEADERS)
+    for p in settings.PEOPLE_DATA:
+        write_to_file(output_file, "a", p.prep4write())
+
+# Clean data before writing to file
+def clean_data(data):
+    if data != None:
+        if type(data) == list:
+            data = ",".join(data)
+        if type(data) == str:
+            data = data.replace("\n","")
+        return data
+    else:
+        return ""
 
 # Exiting program with custom message
 def exiting(message):
@@ -189,6 +213,14 @@ class People:
 
         info_name = "%s\n\nFirst name: %s\nLast name: %s" % (self.fullname, self.firstname, self.lastname)
         return [info_name, content]
+
+    # Prep. in order to write data to file
+    def prep4write(self):
+        content = ""
+        for elt in [self.fullname, self.firstname, self.lastname, self.emails, self.gen_email, self.phones, self.city, self.country_code,
+            self.job, self.employer, self.twitter, self.rocket_id]:
+            content += "%s;" % clean_data(elt)
+        return content
 
     # __str__
     def __str__(self):
