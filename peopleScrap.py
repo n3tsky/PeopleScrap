@@ -70,7 +70,7 @@ def main(args):
 
     # Ask user for pattern validation
     if ask_for_mail_pattern():
-        find_mail_pattern(possible_mail_pattern)
+        find_mail_pattern(possible_mail_pattern, args.d)
 
     # Display to user
     print("\n[*] Now displaying info to user: \n")

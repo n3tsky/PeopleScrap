@@ -1,9 +1,10 @@
 import sys
 import settings
 from tabulate import tabulate
+from unidecode import unidecode
 
 MAX_CHARS=75
-MAIL_PATTERNS = [(1, "{first}.{last}"), (2, "{f}.{last}"), (3, "{first}{last}"), (4, "{f}{last}"), (5, "{first}")]
+MAIL_PATTERNS = [(1, "{first}.{last}"), (2, "{f}.{last}"), (3, "{first}{last}"), (4, "{first}-{last}"), (5, "{f}{last}"), (6, "{first}")]
 
 # Check if value is in given dictionary or return None
 def dict_check_and_get(d, value):
@@ -35,6 +36,7 @@ def properly_add_to_list(m_list, value):
         if value not in m_list:
             m_list.append(value)
 
+# Ask user whether to generate mail pattern or not
 def ask_for_mail_pattern():
     print("\n[*] Mail pattern")
     while True:
@@ -46,9 +48,8 @@ def ask_for_mail_pattern():
         else:
             continue
 
-def find_mail_pattern(possible_value):
-    print("\n[*] Mail pattern:")
-    if possible_value != None or possible_value != "":
+def find_mail_pattern(possible_value, possible_domain = ""):
+    if possible_value != None and possible_value != "":
         print(" - HunterIO find the following mail pattern: \"%s\"" % (possible_value))
     print(" - We propose the following mail pattern for generation:")
     for mi, mp in MAIL_PATTERNS: print("  - %d/ %s" % (mi, mp))
@@ -59,11 +60,34 @@ def find_mail_pattern(possible_value):
             if int(pattern_result) > 0 and (int(pattern_result) <= len(MAIL_PATTERNS)):
                 break
 
-    # Let's generate
-    generating_mail_with_pattern(MAIL_PATTERNS[int(pattern_result)][1])
+    if (possible_domain == None or possible_domain == ""):
+        possible_domain = input("\nPlease provide a domain (@company.com): ")
 
-def generating_mail_with_pattern(pattern):
+    # Let's generate
+    generate_mail_with_pattern(MAIL_PATTERNS[int(pattern_result)-1][1], possible_domain)
+
+# Iterate over PEOPLE_DATA to generate email address according to pattern
+# and add to "gen_email"
+# return: nothing
+def generate_mail_with_pattern(pattern, possible_domain):
     print(" - Generating e-mails with the following pattern: \"%s\"" % (pattern))
+    for p in settings.PEOPLE_DATA:
+        if (p.firstname != "") and (p.lastname != ""):
+            email = build_mail(p.firstname, p.lastname, pattern)
+            p.gen_email = "%s@%s" % (email, possible_domain)
+
+# Build email address according to a specific (user selected) pattern
+# return: email address
+def build_mail(firstname, lastname, pattern):
+    email = pattern
+    # Correct accents
+    u_firstname = unidecode(firstname).lower()
+    u_lastname = unidecode(lastname).lower()
+    # Replacement
+    email = email.replace("{first}", u_firstname)
+    email = email.replace("{last}", u_lastname)
+    email = email.replace("{f}", u_lastname)
+    return email
 
 # Display info gathered to user
 def display_people():
@@ -88,6 +112,7 @@ class People:
         self.job = ""
         self.employer = ""
         self.emails = []
+        self.gen_email = ""
         self.phones = []
         self.twitter = ""
         self.city = ""
@@ -113,6 +138,7 @@ class People:
         if r_status != None:
             self.rocket_status = r_status
 
+    # Parse info from HunterIO API
     def parse_from_hunterIO(self, first_name, last_name, email, phone_number, twitter):
         if first_name != None:
             self.firstname = first_name
@@ -141,17 +167,25 @@ class People:
     # Prep. in order to display info to user
     def prep4display(self):
         content = ""
-        if self.job != None:
+        if self.job != None and self.job != "":
             t_job = self.job.replace("\n","")
             content += "Job: %s\n" % (split_long_string(self.job, MAX_CHARS))
-        if self.employer != None:
+        if self.employer != None and self.employer != "":
             content += "Employer: %s\n" % (self.employer.replace("\n",""))
-        if self.city != None:
+        if self.country_code != None and self.country_code != "":
             content += "Country code: %s\n" % (self.country_code.replace("\n",""))
-        if self.rocket_id != None:
+        if self.city != None and self.city != "":
+            content += "City: %s\n" % (self.city.replace("\n",""))
+        if self.rocket_id != None and self.rocket_id != "":
             content += "RocketReach ID: %s\n" % (self.rocket_id)
-        if self.emails != None:
-            content += "Emails: %s" % (", ".join(self.emails))
+        if self.emails != None and len(self.emails) > 0:
+            content += "Valid emails: %s\n" % (", ".join(self.emails))
+        if self.gen_email != None and self.gen_email != "":
+            content += "Generated email: %s\n" % (self.gen_email)
+        if self.phones != None and len(self.phones) > 0:
+            content += "Phone number(s): %s\n" % (", ".join(self.phones))
+        if self.twitter != None and self.twitter != "":
+            content += "Twitter account: %s" % (self.twitter)
 
         info_name = "%s\n\nFirst name: %s\nLast name: %s" % (self.fullname, self.firstname, self.lastname)
         return [info_name, content]
