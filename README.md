@@ -4,8 +4,11 @@ PeopleScrap helps gathering information about people in a company (i.e.: mycompa
 
 ### Features
 - Find emails, first name, last name, job position, city/location, phone numbers, etc.
-- Developped in Python3
 - Uses RocketReach & Hunter.io APIs to gather information
+- Generate emails according to user's choice
+- Output result to CSV file
+- Developped in Python3
+- Handle user interruption (in case of network issues) and display current results anyway
 
 ### Installation
 * Install Python3 dependencies
@@ -40,6 +43,5 @@ optional arguments:
 
 ### ToDo
 - Finish lookup (RocketReach)
-- Analyze mail patterns
-- Add Hunter.io
+- Try to sort|uniq results
 - Add LinkedIn (API or website)
