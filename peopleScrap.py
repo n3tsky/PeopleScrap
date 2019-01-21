@@ -74,6 +74,9 @@ def main(args):
     if ask_for_mail_pattern():
         find_mail_pattern(possible_mail_pattern, args.d)
 
+    print("\n[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
+    input("\npress any key to continue...\n")
+    
     # Display to user
     print("\n[*] Now displaying info to user: \n")
     display_people()

@@ -3,7 +3,7 @@ import settings
 from tabulate import tabulate
 from unidecode import unidecode
 
-MAX_CHARS=75
+MAX_CHARS=80
 MAIL_PATTERNS = [(1, "{first}.{last}"), (2, "{f}.{last}"), (3, "{first}{last}"), (4, "{first}-{last}"), (5, "{f}{last}"), (6, "{first}")]
 
 # Check if value is in given dictionary or return None
@@ -80,6 +80,7 @@ def generate_mail_with_pattern(pattern, possible_domain):
         if (p.firstname != "") and (p.lastname != ""):
             email = build_mail(p.firstname, p.lastname, pattern)
             p.gen_email = "%s@%s" % (email, possible_domain)
+    print(" - Done generating e-mails!")
 
 # Build email address according to a specific (user selected) pattern
 # return: email address
@@ -100,15 +101,16 @@ def display_people():
     for p in settings.PEOPLE_DATA:
         display_list.append(p.prep4display())
     print(tabulate(display_list, ["Full name", "RocketReach"], "grid"))
-    print("\n[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
 
 # Write output to file
 def write_people(output_file):
+    print("\n[!] Writing data to file")
     HEADERS = "fullname;first name;last name;valid emails;generated email;phones;city;country;job;employer;twitter;rocket ID;"
     # Write headers
     write_to_file(output_file, "w", HEADERS)
     for p in settings.PEOPLE_DATA:
         write_to_file(output_file, "a", p.prep4write())
+    print("[!] Done writing!")
 
 # Clean data before writing to file
 def clean_data(data):
