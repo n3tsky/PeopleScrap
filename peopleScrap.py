@@ -20,8 +20,13 @@ def parse_args():
     parser.add_argument("-d", required=False, metavar="domain", help="Search people in domain (i.e.: mycompany.com)")
     parser.add_argument("-l", required=False, action="store_true", help="Perform lookup search (i.e.: emails)")
 
-    parser.add_argument("-t", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
-    parser.add_argument("--write", required=False, metavar="<file>", help="Output results to file (csv); beware as it will overwrite any data in file")
+    #parser.add_argument("-t", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
+    #parser.add_argument("--write", required=False, metavar="<file>", help="Output results to file (csv); beware as it will overwrite any data in file")
+
+    parser.add_argument("--wait", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
+    parser.add_argument("--timeout", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
+    parser.add_argument("-o", required=False, metavar="<file>", help="Output results to file (csv), beware as it will overwrite any data in file")
+
     parser.add_argument("--user", required=False, metavar="User-agent", default=USER_AGENT, help="Change default user-agent (default: %s)" % USER_AGENT)
     parser.add_argument("--proxy", required=False, metavar="proxy", default="", help="Proxy to perform HTTP requests (ie.: http://localhost:8080, socks5://localhost:8080)")
     parser.add_argument("--nocheck", required=False, action="store_true", help="Do not perform API checks")
@@ -76,7 +81,7 @@ def main(args):
 
     print("\n[*] Total people found: %d" % (len(settings.PEOPLE_DATA)))
     input("\npress any key to continue...\n")
-    
+
     # Display to user
     print("\n[*] Now displaying info to user: \n")
     display_people()

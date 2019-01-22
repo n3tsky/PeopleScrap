@@ -16,8 +16,10 @@ def rocketReach_call_account(HTTP_REQ):
 
 def rocketReach_call_search(HTTP_REQ, company, page_start=1,page_size=100):
     HTTP_REQ["url"] = "%s?api_key=%s&company=%s&page_size=%d&start=%d" % (ROCKETREACH_SEARCH_URL, ROCKETREACH_API_KEY, company, page_size, page_start)
+    pagination, response = None, None
     http_code, response = http_get_json(HTTP_REQ)
-    pagination = dict_check_and_get(response, "pagination")
+    if response != None:
+        pagination = dict_check_and_get(response, "pagination")
     return pagination, response
 
 def rockeyReach_call_lookup(HTTP_REQ, id):
@@ -41,13 +43,14 @@ def rockeyReach_call_lookup(HTTP_REQ, id):
 # Parsing
 def rocketreach_parse_people(json_data):
     profiles = dict_check_and_get(json_data, "profiles")
-    for profile in profiles:
-        p = People()
-        p.parse_from_rocketReach(dict_check_and_get(profile, "name"), dict_check_and_get(profile, "current_title"),
-            dict_check_and_get(profile, "current_employer"), dict_check_and_get(profile, "city"),
-            dict_check_and_get(profile, "country_code"), dict_check_and_get(profile, "id"),
-            dict_check_and_get(profile, "status"))
-        settings.PEOPLE_DATA.append(p)
+    if profiles != None: # Error while parsing profiles
+        for profile in profiles:
+            p = People()
+            p.parse_from_rocketReach(dict_check_and_get(profile, "name"), dict_check_and_get(profile, "current_title"),
+                dict_check_and_get(profile, "current_employer"), dict_check_and_get(profile, "city"),
+                dict_check_and_get(profile, "country_code"), dict_check_and_get(profile, "id"),
+                dict_check_and_get(profile, "status"))
+            settings.PEOPLE_DATA.append(p)
 
 def rocketReach_fetch_people_from_company(HTTP_REQ, company):
     # Get data

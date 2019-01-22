@@ -7,21 +7,12 @@ def http_get_json(HTTP_REQ):
     req = http_get(HTTP_REQ)
     if req != None:
         http_code = req.status_code
-        try:
+        try: # Try and parse JSON data
             json_data = json.loads(req.content)
             return http_code, json_data
         except ValueError as e:
             return http_code, e
     return None, None
-
-
-# Wrapper around requests, handle exceptions and return None if error
-def http_query(HTTP_REQ):
-    try:
-        return http_get(HTTP_REQ)
-    except requests.exceptions.HTTPError as e:
-        print("[!] Exception while performing HTTP request to %s" % (HTTP_REQ["url"]))
-        return None
 
 # Perform HTTP query
 def http_get(HTTP_REQ):
@@ -37,7 +28,9 @@ def http_get(HTTP_REQ):
         return requests.get(HTTP_REQ["url"], headers=headers, proxies=HTTP_REQ["proxy"], timeout=5)
     except requests.exceptions.ConnectionError as e:
         print("[!] No connection to the Internet")
-        return None
     except requests.exceptions.HTTPError as e:
         print("[!] Exception while performing HTTP request to %s" % (HTTP_REQ["url"]))
-        return None
+    except requests.exceptions.ReadTimeout as e:
+        print("[!] Timeout while performing HTTP request to %s" % (HTTP_REQ["url"]))
+
+    return None

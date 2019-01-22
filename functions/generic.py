@@ -8,7 +8,10 @@ MAIL_PATTERNS = [(1, "{first}.{last}"), (2, "{f}.{last}"), (3, "{first}{last}"),
 
 # Check if value is in given dictionary or return None
 def dict_check_and_get(d, value):
-    return d[value] if value in d else None
+    if d == None:
+        return None
+    else:
+        return d[value] if value in d else None
 
 def display_value_from_dict(d, value, pre="", post=""):
     result = dict_check_and_get(d, value)
