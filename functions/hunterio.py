@@ -74,6 +74,7 @@ def hunterIO_fetch_domain_info(HTTP_REQ, domain):
                 break
             current_offset += OFFSET_VALUE
             break
+    print("[*] HunterIO - Done!")
     return ret_pattern
 
 # Display info about account related to API key

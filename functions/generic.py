@@ -195,28 +195,17 @@ class People:
 
     # Prep. in order to display info to user
     def prep4display(self):
-        content = ""
-        if self.job != None and self.job != "":
-            t_job = self.job.replace("\n","")
-            content += "Job: %s\n" % (split_long_string(self.job, MAX_CHARS))
-        if self.employer != None and self.employer != "":
-            content += "Employer: %s\n" % (self.employer.replace("\n",""))
-        if self.country_code != None and self.country_code != "":
-            content += "Country code: %s\n" % (self.country_code.replace("\n",""))
-        if self.city != None and self.city != "":
-            content += "City: %s\n" % (self.city.replace("\n",""))
-        if self.rocket_id != None and self.rocket_id != "":
-            content += "RocketReach ID: %s\n" % (self.rocket_id)
-        if self.emails != None and len(self.emails) > 0:
-            content += "Valid emails: %s\n" % (", ".join(self.emails))
-        if self.gen_email != None and self.gen_email != "":
-            content += "Generated email: %s\n" % (self.gen_email)
-        if self.phones != None and len(self.phones) > 0:
-            content += "Phone number(s): %s\n" % (", ".join(self.phones))
-        if self.twitter != None and self.twitter != "":
-            content += "Twitter account: %s" % (self.twitter)
+        # Regularly "job" is too large for a proper display
+        content = "Job: %s\n" % (split_long_string(clean_data(self.job), MAX_CHARS))
+        # Iterate over info
+        for txt, elt in [("Employer: %s\n", self.employer), ("Country code: %s\n", self.country_code),
+            ("City: %s\n", self.city), ("RocketReach ID: %s\n", self.rocket_id), ("Phones: %s\n", self.phones),
+            ("Twitter: %s\n", self.twitter), ("Valid emails: %s\n", self.emails), ("Generated email: %s\n", self.gen_email)]:
+            result = clean_data(elt)
+            if result != "":
+                content += (txt % (result))
 
-        info_name = "%s\n\nFirst name: %s\nLast name: %s" % (self.fullname, self.firstname, self.lastname)
+        info_name = "%s\n\nFirst name: %s\nLast name: %s" % (clean_data(self.fullname), clean_data(self.firstname), clean_data(self.lastname))
         return [info_name, content]
 
     # Prep. in order to write data to file

@@ -50,7 +50,6 @@ def main(args):
     print(" - Proxy: %s" % (HTTP_REQ["proxy"]))
     print(" - Wait: %ss." % (HTTP_REQ["wait"]))
     print(" - Timeout: %ss.\n" % (HTTP_REQ["timeout"]))
-    return
 
     # Perform some checks to ensure RocketReach's API key is ok
     if not args.nocheck:

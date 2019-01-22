@@ -69,6 +69,7 @@ def rocketReach_fetch_people_from_company(HTTP_REQ, company):
         # Get pagination
         current_page = dict_check_and_get(pagination, "thisPage")
         next_page = dict_check_and_get(pagination, "nextPage")
+    print("[*] RocketReach - Done!")
 
 # Perform lookup (search for more information about people)
 def rocketReach_lookup_people(HTTP_REQ):
