@@ -1,11 +1,14 @@
 #### Set API keys here
+# RocketReach
 ROCKETREACH_API_KEY=""
+# HunterIO
 HUNTERIO_API_KEY=""
 
 #### Some constants
 # Web/requests
 USER_AGENT="Mozilla/5.0 (Windows NT 6.1; WOW64; rv:64.0) Gecko/20100101 Firefox/64.0"
 DEFAULT_WAIT=2
+DEFAULT_TIMEOUT=3
 
 ### API
 # RocketReach
