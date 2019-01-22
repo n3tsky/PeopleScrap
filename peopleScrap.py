@@ -19,16 +19,12 @@ def parse_args():
     parser.add_argument("-c", required=False, metavar="company", help="Search people in company (i.e.: mycompany)")
     parser.add_argument("-d", required=False, metavar="domain", help="Search people in domain (i.e.: mycompany.com)")
     parser.add_argument("-l", required=False, action="store_true", help="Perform lookup search (i.e.: emails)")
-
-    #parser.add_argument("-t", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
-    #parser.add_argument("--write", required=False, metavar="<file>", help="Output results to file (csv); beware as it will overwrite any data in file")
-
-    parser.add_argument("--wait", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
-    parser.add_argument("--timeout", required=False, metavar="time", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
     parser.add_argument("-o", required=False, metavar="<file>", help="Output results to file (csv), beware as it will overwrite any data in file")
 
-    parser.add_argument("--user", required=False, metavar="User-agent", default=USER_AGENT, help="Change default user-agent (default: %s)" % USER_AGENT)
-    parser.add_argument("--proxy", required=False, metavar="proxy", default="", help="Proxy to perform HTTP requests (ie.: http://localhost:8080, socks5://localhost:8080)")
+    parser.add_argument("--wait", required=False, metavar="<time>", default=DEFAULT_WAIT, type=int, help="Time to wait between requests (default: %ss.)" % DEFAULT_WAIT)
+    parser.add_argument("--timeout", required=False, metavar="<time>", default=DEFAULT_TIMEOUT, type=int, help="Timeout for HTTP requests (default: %ss.)" % DEFAULT_TIMEOUT)
+    parser.add_argument("--user", required=False, metavar="<user-agent>", default=USER_AGENT, help="Change default user-agent (default: %s)" % USER_AGENT)
+    parser.add_argument("--proxy", required=False, metavar="<proxy>", default="", help="Proxy to perform HTTP requests (ie.: http://localhost:8080, socks5://localhost:8080)")
     parser.add_argument("--nocheck", required=False, action="store_true", help="Do not perform API checks")
     args = parser.parse_args()
 
@@ -41,17 +37,20 @@ def parse_args():
 def main(args):
     # Set HTTP_REQ
     HTTP_REQ = {}
-    HTTP_REQ["user-agent"] = USER_AGENT
+    HTTP_REQ["user-agent"] = args.user
     HTTP_REQ["proxy"] = {} if (len(args.proxy) == 0) else {"https": args.proxy, "http": args.proxy}
-    HTTP_REQ["time"] = args.t
+    HTTP_REQ["wait"] = args.wait # Default wait time or user selected value
+    HTTP_REQ["timeout"] = args.timeout # Default timeout or user selected value
 
     # Display some info
     print("[*] Options")
-    if (args.write):
-        print(" - Output file: \"%s\"" % (args.write))
+    if (args.o):
+        print(" - Output file: \"%s\"" % (args.o))
     print(" - User-Agent: %s" % (HTTP_REQ["user-agent"]))
     print(" - Proxy: %s" % (HTTP_REQ["proxy"]))
-    print(" - Time: %ss.\n" % (HTTP_REQ["time"]))
+    print(" - Wait: %ss." % (HTTP_REQ["wait"]))
+    print(" - Timeout: %ss.\n" % (HTTP_REQ["timeout"]))
+    return
 
     # Perform some checks to ensure RocketReach's API key is ok
     if not args.nocheck:
@@ -87,8 +86,8 @@ def main(args):
     display_people()
 
     # Write output to file
-    if (args.write):
-        write_people(args.write)
+    if (args.o):
+        write_people(args.o)
 
 # Starts here
 if __name__ == "__main__":

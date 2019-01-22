@@ -25,7 +25,7 @@ def http_get(HTTP_REQ):
     }
 
     try:
-        return requests.get(HTTP_REQ["url"], headers=headers, proxies=HTTP_REQ["proxy"], timeout=5)
+        return requests.get(HTTP_REQ["url"], headers=headers, proxies=HTTP_REQ["proxy"], timeout=HTTP_REQ["timeout"])
     except requests.exceptions.ConnectionError as e:
         print("[!] No connection to the Internet")
     except requests.exceptions.HTTPError as e:
